@@ -24,7 +24,7 @@ from conans import ConanFile, CMake, tools
 
 class GoogleBenchmarkConan(ConanFile):
     name = "google-benchmark"
-    version = "1.4.1"
+    version = "master"
     description = "A microbenchmark support library"
     homepage = "https://github.com/google/benchmark"
     license = "https://github.com/google/benchmark/blob/master/LICENSE"
@@ -39,11 +39,11 @@ class GoogleBenchmarkConan(ConanFile):
         "lto": [True, False],
     }
     default_options = ("shared=False", "fPIC=True", "exceptions=True", "lto=False")
-    scm = {
-        "type": "git",
-        "url": "https://github.com/google/benchmark.git",
-        "revision": "v%s" % version,
-    }
+    #scm = {
+    #    "type": "git",
+    #    "url": "https://github.com/google/benchmark.git",
+    #    "revision": "v%s" % version,
+    #}
 
     def config_options(self):
         if self.settings.os == 'Windows':
@@ -55,6 +55,11 @@ class GoogleBenchmarkConan(ConanFile):
             self.build_requires("gtest/1.8.1@bincrafters/stable")
 
     def source(self):
+        # TODO: master
+        source_url = "https://github.com/museghost/benchmark.git"
+        git = tools.Git()
+        git.clone(source_url, "master")
+
         tools.replace_in_file("CMakeLists.txt",
                               "project (benchmark)",
                               """project (benchmark)
