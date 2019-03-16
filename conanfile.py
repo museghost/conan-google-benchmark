@@ -75,6 +75,9 @@ conan_basic_setup(TARGETS)""")
         return cmake
 
     def build(self):
+        # git pull
+        self.run("git pull")
+
         cmake = self._configure_cmake()
         cmake.build()
         if tools.get_env("CONAN_RUN_TESTS", False):
