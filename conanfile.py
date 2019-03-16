@@ -68,9 +68,18 @@ conan_basic_setup(TARGETS)""")
 
     def _configure_cmake(self):
         cmake = CMake(self)
+        
         cmake.definitions["BENCHMARK_ENABLE_EXCEPTIONS"] = "ON" if self.options.exceptions else "OFF"
         cmake.definitions["BENCHMARK_ENABLE_LTO"] = "ON" if self.options.lto else "OFF"
         cmake.definitions["BENCHMARK_ENABLE_TESTING"] = "ON" if tools.get_env("CONAN_RUN_TESTS", False) else "OFF"
+
+         # See https://github.com/google/benchmark/pull/638 for Windows 32 build explanation
+        if self.settings.os != "Windows":
+            cmake.definitions["BENCHMARK_BUILD_32_BITS"] = "ON" if "64" not in str(self.settings.arch) else "OFF"
+            cmake.definitions["BENCHMARK_USE_LIBCXX"] = "ON" if (str(self.settings.compiler.libcxx) == "libc++") else "OFF"
+        else:
+            cmake.definitions["BENCHMARK_USE_LIBCXX"] = "OFF"
+
         cmake.configure()
         return cmake
 
@@ -89,6 +98,10 @@ conan_basic_setup(TARGETS)""")
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.libs = ["benchmark"]
+        self.cpp_info.libs = tools.collect_libs(self)
         if self.settings.os == "Linux":
-            self.cpp_info.libs.extend(["pthread"])
+            self.cpp_info.libs.extend(["pthread", "rt"])
+        elif self.settings.os == "Windows":
+            self.cpp_info.libs.append("shlwapi")
+        elif self.settings.os == "SunOS":
+            self.cpp_info.libs.append("kstat")
