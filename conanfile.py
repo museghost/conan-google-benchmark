@@ -82,3 +82,5 @@ conan_basic_setup(TARGETS)""")
 
     def package_info(self):
         self.cpp_info.libs = ["benchmark"]
+        if self.settings.os == "Linux":
+            self.cpp_info.libs.extend(["pthread"])
